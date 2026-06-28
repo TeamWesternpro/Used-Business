@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const https = require('https');
 
 const DATA_DIR = '/tmp/usedbusiness';
 const LISTINGS_FILE = path.join(DATA_DIR, 'listings.json');
@@ -70,4 +71,33 @@ function sendJSON(res, status, data) {
     res.end(JSON.stringify(data));
 }
 
-module.exports = { getListings, saveListings, getConfig, saveConfig, generateId, readBody, sendJSON };
+function sendDiscordWebhook(webhookUrl, content) {
+    if (!webhookUrl || typeof webhookUrl !== 'string' || webhookUrl.trim() === '') return;
+    let url;
+    try {
+        url = new URL(webhookUrl);
+    } catch (e) {
+        return;
+    }
+    const payload = JSON.stringify(content);
+    const options = {
+        hostname: url.hostname,
+        path: url.pathname + url.search,
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Content-Length': Buffer.byteLength(payload)
+        }
+    };
+    const req = https.request(options, (res) => {
+        res.on('data', () => {});
+    });
+    req.on('error', () => {});
+    req.write(payload);
+    req.end();
+}
+
+module.exports = {
+    getListings, saveListings, getConfig, saveConfig,
+    generateId, readBody, sendJSON, sendDiscordWebhook
+};
