@@ -1,4 +1,4 @@
-const { getListings, readBody, sendJSON, getConfig } = require('./utils');
+const { getListings, readBody, sendJSON, getConfig, sendDiscordWebhook } = require('./utils');
 
 module.exports = async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
