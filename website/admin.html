@@ -49,6 +49,9 @@
                 <button class="btn btn-primary" onclick="showAddModal()">
                     &#10010; Add Listing
                 </button>
+                <button class="btn btn-secondary" onclick="loadBookings()">
+                    &#128197; Bookings
+                </button>
                 <button class="btn btn-secondary" onclick="handleLogout()">
                     &#128682; Logout
                 </button>
@@ -96,6 +99,11 @@
                 <h3>No listings yet</h3>
                 <p>Click "Add Listing" to create your first business listing.</p>
             </div>
+        </div>
+
+        <div id="bookings-section" style="display: none;">
+            <h2 class="section-title" style="margin-top: 32px; margin-bottom: 16px;">&#128197; Booking Requests</h2>
+            <div id="bookings-list" class="bookings-list"></div>
         </div>
     </div>
 
