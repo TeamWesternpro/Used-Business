@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Used Businesses</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="shortcut icon" href="favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-content">
+            <div class="nav-brand">
+                <div class="nav-icon">&#128736;</div>
+                <span>Admin Dashboard</span>
+            </div>
+            <div class="nav-links">
+                <a href="index.html" class="nav-link">Listings</a>
+                <a href="admin.html" class="nav-link active">Admin</a>
+            </div>
+        </div>
+    </nav>
+
+    <div id="login-overlay" class="login-overlay">
+        <div class="login-card">
+            <div class="header-icon" style="margin: 0 auto 20px;">&#128274;</div>
+            <h2>Admin Login</h2>
+            <p>Enter your credentials to manage listings</p>
+            <div class="form-group">
+                <label>Username</label>
+                <input type="text" id="login-user" placeholder="admin">
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="login-pass" placeholder="Enter password">
+            </div>
+            <button class="btn btn-primary btn-full" onclick="handleLogin()">Login</button>
+        </div>
+    </div>
+
+    <div id="dashboard-app" class="main-container" style="display: none;">
+        <div class="header">
+            <div class="header-title">
+                <div class="header-icon">&#128736;</div>
+                <h1>Admin Dashboard</h1>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-primary" onclick="showAddModal()">
+                    &#10010; Add Listing
+                </button>
+                <button class="btn btn-secondary" onclick="showWebhooksModal()">
+                    &#128279; Webhooks
+                </button>
+                <button class="btn btn-secondary" onclick="handleLogout()">
+                    &#128682; Logout
+                </button>
+            </div>
+        </div>
+
+        <div class="search-bar-container">
+            <div class="search-bar search-bar-wide">
+                <span class="search-icon">&#128269;</span>
+                <input type="text" id="dash-search-input" placeholder="Search listings..." oninput="searchDashListings(this.value)">
+            </div>
+        </div>
+
+        <div class="stats-bar">
+            <div class="stat-card stat-total">
+                <div class="stat-icon">&#128188;</div>
+                <div class="stat-info">
+                    <span class="stat-value" id="stat-total">0</span>
+                    <span class="stat-label">Total Listings</span>
+                </div>
+            </div>
+            <div class="stat-card stat-available">
+                <div class="stat-icon">&#9989;</div>
+                <div class="stat-info">
+                    <span class="stat-value" id="stat-available">0</span>
+                    <span class="stat-label">Available</span>
+                </div>
+            </div>
+            <div class="stat-card stat-unavailable">
+                <div class="stat-icon">&#10060;</div>
+                <div class="stat-info">
+                    <span class="stat-value" id="stat-unavailable">0</span>
+                    <span class="stat-label">Not Available</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="filter-bar">
+            <div id="dash-filter-btns" class="filter-btns-container"></div>
+        </div>
+
+        <div id="dashboard-cards" class="cards-grid">
+            <div class="empty-state" id="dash-empty-state">
+                <div class="empty-icon">&#128203;</div>
+                <h3>No listings yet</h3>
+                <p>Click "Add Listing" to create your first business listing.</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="add-edit-modal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="modal-title">Add New Listing</h2>
+                <button class="btn btn-close" onclick="closeModal()">&#10005;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="edit-id">
+                <div class="form-group">
+                    <label>Title</label>
+                    <input type="text" id="listing-title" placeholder="Business name...">
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="listing-description" placeholder="Describe the business..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Tags</label>
+                    <select id="listing-tags">
+                        <option value="Available">Available</option>
+                        <option value="Not Available">Not Available</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Type</label>
+                    <select id="listing-type">
+                        <option value="Dealership">Dealership</option>
+                        <option value="Mechanic">Mechanic</option>
+                        <option value="Shops">Shops</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Price ($)</label>
+                    <input type="number" id="listing-price" placeholder="50000" min="0">
+                </div>
+                <div class="form-group">
+                    <label>Postal / Location</label>
+                    <input type="text" id="listing-postal" placeholder="e.g. 142, Paleto Blvd">
+                </div>
+                <div class="form-group">
+                    <label>Thumbnail Image</label>
+                    <div class="upload-area" id="upload-area" onclick="document.getElementById('listing-thumbnail').click()">
+                        <div class="upload-icon">&#128247;</div>
+                        <p>Click to upload an image</p>
+                        <p class="upload-hint">JPG, PNG, GIF — Max 2MB</p>
+                    </div>
+                    <input type="file" id="listing-thumbnail" accept="image/*" style="display:none" onchange="handleThumbnailPreview(this)">
+                    <div id="thumbnail-preview" class="thumbnail-preview" style="display:none">
+                        <img id="preview-img" src="" alt="Preview">
+                        <button class="btn btn-danger" onclick="removeThumbnail()" style="padding:6px 12px;font-size:0.75rem;">Remove</button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-danger" id="btn-delete" onclick="deleteListing()" style="margin-right: auto; display: none;">Delete</button>
+                <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                <button class="btn btn-primary" id="btn-save" onclick="saveDashListing()">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="webhooks-modal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Webhook Settings</h2>
+                <button class="btn btn-close" onclick="closeWebhooksModal()">&#10005;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>New Listing Webhook URL</label>
+                    <input type="text" id="webhook-listings" placeholder="https://discord.com/api/webhooks/...">
+                    <small>Sent when a new business is added.</small>
+                </div>
+                <div class="form-group">
+                    <label>Booking Webhook URL</label>
+                    <input type="text" id="webhook-bookings" placeholder="https://discord.com/api/webhooks/...">
+                    <small>Sent when a player makes a booking.</small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeWebhooksModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveWebhooks()">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="notification" class="notification"></div>
+
+    <footer class="footer">
+        <p>Used Business Dealership &copy; 2026</p>
+    </footer>
+
+    <script src="js/app.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+</html>
