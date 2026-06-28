@@ -137,8 +137,10 @@ async function loadWebhooks() {
         const res = await fetch('/api/webhooks');
         const data = await res.json();
         if (data.success && data.webhooks) {
-            document.getElementById('webhook-listings').value = data.webhooks.listings || '';
-            document.getElementById('webhook-bookings').value = data.webhooks.bookings || '';
+            listingsWebhook = data.webhooks.listings || '';
+            bookingsWebhook = data.webhooks.bookings || '';
+            document.getElementById('webhook-listings').value = listingsWebhook;
+            document.getElementById('webhook-bookings').value = bookingsWebhook;
         }
     } catch (e) {
         console.error('Failed to load webhooks:', e);
@@ -164,6 +166,27 @@ async function saveWebhooks() {
         }
     } catch (e) {
         ShowNotification('error', 'Failed to save webhooks.');
+    }
+}
+
+async function resendWebhook(id) {
+    const listing = dashListings.find(function(l) { return l.id === id; });
+    if (!listing) return;
+
+    try {
+        const res = await fetch('/api/webhooks/resend', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ listing: listing, listingsWebhook: listingsWebhook })
+        });
+        const data = await res.json();
+        if (data.success) {
+            ShowNotification('success', 'Webhook resent!');
+        } else {
+            ShowNotification('error', data.error || 'Failed to resend webhook.');
+        }
+    } catch (e) {
+        ShowNotification('error', 'Failed to resend webhook.');
     }
 }
 
