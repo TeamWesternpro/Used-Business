@@ -59,9 +59,11 @@ Edit `config.lua` to customize:
 
 ## Admin Dashboard Login
 
-Default credentials:
-- **Username:** `admin`
-- **Password:** `admin123`
+    | this one will be set by the server owner if you have issue then contact us from our offical discord server
+
+## New Feature will coming soon for new version
+    | Phone adon 
+    | inventory tablet 
 
 > **IMPORTANT:** Change these in `html/js/admin.js` before deploying to production!
 
