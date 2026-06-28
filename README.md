@@ -114,3 +114,4 @@ Listings are stored in `data/listings.json`. This file is auto-created and manag
 - The dashboard uses a simple username/password login as a first layer; Ace permissions are the real access control
 - All changes sync in real-time to all connected players
 - The tablet and dashboard share the same modern blue glass CSS theme
+
