@@ -6,6 +6,7 @@ const PORT = 3000;
 const DATA_DIR = path.join(__dirname, '..', 'data');
 const LISTINGS_FILE = path.join(DATA_DIR, 'listings.json');
 const CONFIG_FILE = path.join(DATA_DIR, 'config.json');
+const BOOKINGS_FILE = path.join(DATA_DIR, 'bookings.json');
 const WEBSITE_DIR = __dirname;
 
 const MIME_TYPES = {
@@ -49,6 +50,20 @@ function loadConfig() {
 function saveConfig(config) {
     try { fs.mkdirSync(DATA_DIR, { recursive: true }); } catch (e) {}
     fs.writeFileSync(CONFIG_FILE, JSON.stringify(config, null, 2));
+}
+
+function loadBookings() {
+    try {
+        const data = fs.readFileSync(BOOKINGS_FILE, 'utf8');
+        return JSON.parse(data);
+    } catch (e) {
+        return [];
+    }
+}
+
+function saveBookings(bookings) {
+    try { fs.mkdirSync(DATA_DIR, { recursive: true }); } catch (e) {}
+    fs.writeFileSync(BOOKINGS_FILE, JSON.stringify(bookings, null, 2));
 }
 
 function generateId() {
@@ -123,14 +138,39 @@ const server = http.createServer(async (req, res) => {
         return;
     }
 
-    if (url.pathname === '/api/bookings' && req.method === 'POST') {
-        const body = await readBody(req);
-        if (!body || !body.username || !body.business) {
-            sendJSON(res, 400, { success: false, error: 'Name and business are required.' });
+    if (url.pathname === '/api/bookings') {
+        if (req.method === 'GET') {
+            const bookings = loadBookings ? loadBookings() : [];
+            sendJSON(res, 200, { success: true, bookings: bookings });
             return;
         }
-
-        sendJSON(res, 200, { success: true });
+        if (req.method === 'POST') {
+            const body = await readBody(req);
+            if (!body || !body.username || !body.business) {
+                sendJSON(res, 400, { success: false, error: 'Name and business are required.' });
+                return;
+            }
+            const listings = loadListings();
+            const listing = listings.find(function(l) { return l.id === body.listingId; }) || {};
+            const booking = {
+                id: Date.now().toString(),
+                listingId: body.listingId || '',
+                business: body.business || 'Unknown Business',
+                type: (listing.type || 'N/A'),
+                username: body.username || '',
+                phone: body.phone || 'N/A',
+                date: body.date || 'N/A',
+                time: body.time || 'N/A',
+                notes: body.notes || '',
+                createdAt: new Date().toISOString()
+            };
+            const bookings = loadBookings ? loadBookings() : [];
+            bookings.unshift(booking);
+            if (saveBookings) saveBookings(bookings);
+            sendJSON(res, 200, { success: true, booking: booking });
+            return;
+        }
+        sendJSON(res, 405, { success: false, error: 'Method not allowed' });
         return;
     }
 
