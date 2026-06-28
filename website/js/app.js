@@ -1,4 +1,6 @@
 const API_BASE = '/api';
+let listingsWebhook = '';
+let bookingsWebhook = '';
 
 function GetTypeIcon(type) {
     switch (type) {
@@ -52,6 +54,7 @@ function CreateCardHTML(listing, showActions) {
 
     if (showActions) {
         actionsHTML += '<div class="card-actions">' +
+            '<button class="btn btn-discord" onclick="resendWebhook(\'' + listing.id + '\')" title="Resend Discord webhook">&#128279; Resend</button>' +
             '<button class="btn btn-primary" onclick="editListing(\'' + listing.id + '\')">&#9998; Edit</button>' +
             '<button class="btn btn-danger" onclick="deleteListingConfirm(\'' + listing.id + '\')">&#128465; Delete</button>' +
             '</div>';
@@ -293,10 +296,11 @@ async function SaveListingAPI(data) {
     try {
         const method = data.id ? 'PUT' : 'POST';
         const url = data.id ? API_BASE + '/listings/' + data.id : API_BASE + '/listings';
+        const payload = Object.assign({}, data, { listingsWebhook: listingsWebhook });
         const res = await fetch(url, {
             method: method,
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
+            body: JSON.stringify(payload)
         });
         return await res.json();
     } catch (e) {
@@ -388,7 +392,8 @@ async function submitBooking() {
         phone: phone,
         date: date,
         time: time,
-        notes: notes
+        notes: notes,
+        bookingsWebhook: bookingsWebhook
     };
 
     try {
