@@ -1,4 +1,4 @@
-const { getListings, saveListings, readBody, sendJSON, generateId, getConfig } = require('./utils');
+const { getListings, saveListings, readBody, sendJSON, generateId, getConfig, sendDiscordWebhook } = require('./utils');
 
 module.exports = async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -43,6 +43,26 @@ module.exports = async function handler(req, res) {
         const listings = await getListings();
         listings.push(newListing);
         await saveListings(listings);
+
+        const config = await getConfig();
+        if (config.listingsWebhook) {
+            const priceStr = '$' + Number(newListing.price || 0).toLocaleString();
+            sendDiscordWebhook(config.listingsWebhook, {
+                embeds: [{
+                    title: 'New Business Listed',
+                    description: '**' + (newListing.title || 'Untitled') + '**',
+                    color: 3066993,
+                    fields: [
+                        { name: 'Type', value: newListing.type, inline: true },
+                        { name: 'Price', value: priceStr, inline: true },
+                        { name: 'Status', value: newListing.tags, inline: true }
+                    ],
+                    footer: { text: 'Used Businesses' },
+                    timestamp: new Date().toISOString()
+                }]
+            });
+        }
+
         sendJSON(res, 201, { success: true, listing: newListing });
         return;
     }
