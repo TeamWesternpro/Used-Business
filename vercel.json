@@ -5,7 +5,10 @@
     { "src": "api/**/*.js", "use": "@vercel/node" }
   ],
   "routes": [
-    { "src": "/api/(.*)", "dest": "/api/$1" },
+    { "src": "/api/config", "dest": "/api/config.js" },
+    { "src": "/api/listings", "dest": "/api/listings.js" },
+    { "src": "/api/webhooks", "dest": "/api/webhooks.js" },
+    { "src": "/api/bookings", "dest": "/api/bookings.js" },
     { "src": "/(.*)", "dest": "/website/$1" }
   ]
 }
