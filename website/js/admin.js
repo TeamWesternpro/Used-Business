@@ -123,6 +123,47 @@ function closeModal() {
     CloseModal();
 }
 
+async function loadBookings() {
+    try {
+        const res = await fetch('/api/bookings');
+        const data = await res.json();
+        if (data.success && data.bookings) {
+            renderBookings(data.bookings);
+        }
+    } catch (e) {
+        console.error('Failed to load bookings:', e);
+    }
+}
+
+function renderBookings(bookings) {
+    const container = document.getElementById('bookings-list');
+    const section = document.getElementById('bookings-section');
+    if (!container || !section) return;
+
+    section.style.display = 'block';
+
+    if (bookings.length === 0) {
+        container.innerHTML = '<div class="empty-state"><div class="empty-icon">&#128197;</div><h3>No bookings yet</h3><p>Booking requests will appear here.</p></div>';
+        return;
+    }
+
+    let html = '<div class="bookings-table-wrapper"><table class="bookings-table"><thead><tr><th>Business</th><th>Type</th><th>Name</th><th>Phone</th><th>Date</th><th>Time</th><th>Notes</th><th>Submitted</th></tr></thead><tbody>';
+    bookings.forEach(function(b) {
+        html += '<tr>' +
+            '<td>' + (b.business || 'N/A') + '</td>' +
+            '<td>' + (b.type || 'N/A') + '</td>' +
+            '<td>' + (b.username || 'N/A') + '</td>' +
+            '<td>' + (b.phone || 'N/A') + '</td>' +
+            '<td>' + (b.date || 'N/A') + '</td>' +
+            '<td>' + (b.time || 'N/A') + '</td>' +
+            '<td>' + (b.notes || '') + '</td>' +
+            '<td>' + (b.createdAt ? new Date(b.createdAt).toLocaleString() : 'N/A') + '</td>' +
+            '</tr>';
+    });
+    html += '</tbody></table></div>';
+    container.innerHTML = html;
+}
+
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Enter' && document.getElementById('login-overlay').style.display !== 'none') {
         handleLogin();
