@@ -2,8 +2,6 @@ Config = {}
 
 Config.Debug = true
 
-Config.WebsiteURL = 'http://localhost:3000'
-
 Config.Tablet = {
     Command = 'tablet',
     Keybind = 'F6',
