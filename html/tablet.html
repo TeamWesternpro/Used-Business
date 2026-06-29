@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Used Businesses</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="stylesheet" href="css/style.css?v=15">
+    <style>
+        html, body { background: transparent !important; background-color: rgba(0,0,0,0) !important; }
+    </style>
+</head>
+<body>
+    <div id="tablet-view" class="main-container" style="display: none;">
+        <div class="tablet-header">
+            <div class="tablet-notch">
+                <div class="tablet-notch-dot"></div>
+                <span class="tablet-notch-text">Used Businesses</span>
+            </div>
+            <span class="tablet-time" id="tablet-time"></span>
+        </div>
+        <div class="tablet-content">
+            <div class="header">
+                <div class="header-title">
+                    <div class="header-icon">&#128188;</div>
+                    <h1>Listings</h1>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-secondary" onclick="refreshListings()" title="Refresh listings">
+                        &#8635;
+                    </button>
+                    <button class="btn btn-admin" id="btn-dashboard" onclick="handleLogin()">
+                        &#9881; Admin
+                    </button>
+                    <button class="btn btn-close" onclick="closeAll()">&#10005;</button>
+                </div>
+            </div>
+
+            <div class="search-bar-container">
+                <div class="search-bar search-bar-wide">
+                    <span class="search-icon">&#128269;</span>
+                    <input type="text" id="search-input" placeholder="Search businesses..." oninput="searchListings(this.value)">
+                </div>
+            </div>
+
+            <div class="filter-bar">
+                <div id="tablet-filter-btns" class="filter-btns-container"></div>
+            </div>
+
+            <div id="cards-grid" class="cards-grid scrollbar-custom">
+                <div class="empty-state" id="empty-state">
+                    <div class="empty-icon">&#128203;</div>
+                    <h3>No listings yet</h3>
+                    <p>Business listings will appear here once added.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="login-view" class="login-overlay" style="display: none;">
+        <div class="login-card">
+            <div class="header-icon" style="margin: 0 auto 20px;">&#128274;</div>
+            <h2>Admin Dashboard</h2>
+            <p>Enter your credentials to manage listings</p>
+            <button class="btn btn-primary btn-full" onclick="handleLogin()">Login with Ace Permissions</button>
+            <button class="btn btn-secondary btn-full" style="margin-top: 12px;" onclick="showTablet()">Back to Listings</button>
+        </div>
+    </div>
+
+    <div id="dashboard-view" class="main-container" style="display: none;">
+        <div class="tablet-header">
+            <div class="tablet-notch">
+                <div class="tablet-notch-dot"></div>
+                <span class="tablet-notch-text">Admin Panel</span>
+            </div>
+            <span class="tablet-time" id="dashboard-time"></span>
+        </div>
+        <div class="tablet-content">
+        <div class="header">
+            <div class="header-title">
+                <div class="header-icon">&#128736;</div>
+                <h1>Admin Dashboard</h1>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-primary" onclick="showAddModal()">
+                    &#10010; Add
+                </button>
+                <button class="btn btn-secondary" onclick="showTablet()">
+                    &#128196; Listings
+                </button>
+                <button class="btn btn-secondary" onclick="showBookings()">
+                    &#128197; Bookings
+                </button>
+                <button class="btn btn-secondary" onclick="handleLogout()">
+                    &#128682; Logout
+                </button>
+                <button class="btn btn-close" onclick="closeAll()">&#10005;</button>
+            </div>
+        </div>
+
+        <div class="search-bar-container">
+            <div class="search-bar search-bar-wide">
+                <span class="search-icon">&#128269;</span>
+                <input type="text" id="dash-search-input" placeholder="Search listings..." oninput="searchDashListings(this.value)">
+            </div>
+        </div>
+
+        <div class="stats-bar">
+            <div class="stat-card stat-total">
+                <div class="stat-icon">&#128188;</div>
+                <div class="stat-info">
+                    <span class="stat-value" id="stat-total">0</span>
+                    <span class="stat-label">Total Listings</span>
+                </div>
+            </div>
+            <div class="stat-card stat-available">
+                <div class="stat-icon">&#9989;</div>
+                <div class="stat-info">
+                    <span class="stat-value" id="stat-available">0</span>
+                    <span class="stat-label">Available</span>
+                </div>
+            </div>
+            <div class="stat-card stat-unavailable">
+                <div class="stat-icon">&#10060;</div>
+                <div class="stat-info">
+                    <span class="stat-value" id="stat-unavailable">0</span>
+                    <span class="stat-label">Not Available</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="filter-bar">
+            <div id="dash-filter-btns" class="filter-btns-container"></div>
+        </div>
+
+        <div id="dashboard-cards" class="cards-grid scrollbar-custom">
+            <div class="empty-state" id="dash-empty-state">
+                <div class="empty-icon">&#128203;</div>
+                <h3>No listings yet</h3>
+                <p>Click "Add Listing" to create your first business listing.</p>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <div id="bookings-modal" class="modal-overlay">
+        <div class="modal" style="max-width:700px;">
+            <div class="modal-header">
+                <h2>&#128197; Booking Requests</h2>
+                <button class="btn btn-close" onclick="closeBookingsModal()">&#10005;</button>
+            </div>
+            <div class="modal-body" style="max-height:60vh;overflow-y:auto;">
+                <div id="bookings-container">
+                    <div class="bookings-table-wrapper">
+                        <table class="bookings-table" id="bookings-table">
+                            <thead><tr>
+                                <th>Business</th>
+                                <th>Name</th>
+                                <th>Phone</th>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Notes</th>
+                            </tr></thead>
+                            <tbody id="bookings-tbody"></tbody>
+                        </table>
+                    </div>
+                    <div class="empty-state" id="bookings-empty" style="display:none;">
+                        <div class="empty-icon">&#128197;</div>
+                        <h3>No bookings yet</h3>
+                        <p>Booking requests from players will appear here.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeBookingsModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="add-edit-modal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="modal-title">Add New Listing</h2>
+                <button class="btn btn-close" onclick="closeModal()">&#10005;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="edit-id">
+                <div class="form-group">
+                    <label>Title</label>
+                    <input type="text" id="listing-title" placeholder="Business name...">
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="listing-description" placeholder="Describe the business..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Tags</label>
+                    <select id="listing-tags">
+                        <option value="Available">Available</option>
+                        <option value="Not Available">Not Available</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Type</label>
+                    <select id="listing-type">
+                        <option value="Dealership">Dealership</option>
+                        <option value="Mechanic">Mechanic</option>
+                        <option value="Shops">Shops</option>
+                        <option value="Houses">Houses</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Price ($)</label>
+                    <input type="number" id="listing-price" placeholder="50000" min="0">
+                </div>
+                <div class="form-group">
+                    <label>Postal / Location</label>
+                    <input type="text" id="listing-postal" placeholder="e.g. 142, Paleto Blvd">
+                </div>
+                <div class="form-group">
+                    <label>Thumbnail Image URL</label>
+                    <input type="url" id="listing-thumbnail" placeholder="https://i.imgur.com/example.jpg" oninput="previewThumbnailUrl(this.value)">
+                    <div id="thumbnail-preview" class="thumbnail-preview" style="display:none;margin-top:8px;">
+                        <img id="preview-img" src="" alt="Preview">
+                        <button class="btn btn-danger" onclick="removeThumbnail()" style="padding:4px 10px;font-size:0.75rem;">Remove</button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-danger" id="btn-delete" onclick="deleteListing()" style="margin-right: auto; display: none;">Delete</button>
+                <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                <button class="btn btn-primary" id="btn-save" onclick="saveDashListing()">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="booking-modal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Book a Viewing</h2>
+                <button class="btn btn-close" onclick="closeBookingModal()">&#10005;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="booking-listing-id">
+                <input type="hidden" id="booking-listing-title">
+                <div class="booking-business-info">
+                    <span class="booking-business-icon">&#128188;</span>
+                    <span id="booking-business-name">-</span>
+                </div>
+                <div class="form-group">
+                    <label>Your Name</label>
+                    <input type="text" id="booking-username" placeholder="Enter your name...">
+                </div>
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input type="text" id="booking-phone" placeholder="Your phone number...">
+                </div>
+                <div class="form-group">
+                    <label>Preferred Date</label>
+                    <input type="date" id="booking-date">
+                </div>
+                <div class="form-group">
+                    <label>Preferred Time</label>
+                    <input type="time" id="booking-time">
+                </div>
+                <div class="form-group">
+                    <label>Notes (optional)</label>
+                    <textarea id="booking-notes" placeholder="Any additional info..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeBookingModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="submitBooking()">Send Booking Request</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="notification" class="notification"></div>
+
+    <script src="js/app.js?v=8"></script>
+    <script src="js/tablet.js?v=8"></script>
+    <script src="js/admin.js?v=8"></script>
+</body>
+</html>
